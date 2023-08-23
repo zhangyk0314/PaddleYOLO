@@ -292,8 +292,9 @@ def resnet_unit_init_(module):
         print("conv in resnet_unit has bias !!")
 
 def yolo_unit_conv_init_(module):
-    bound = 1 / np.sqrt(np.prod(module.filter.shape[1:]))
-    uniform_(module.filter, -bound, bound)
+    if hasattr(module, "filter"):
+        bound = 1 / np.sqrt(np.prod(module.filter.shape[1:]))
+        uniform_(module.filter, -bound, bound)
     if module.conv_bias:
         print("conv in yolo_unit has bias !!")
 
@@ -353,6 +354,8 @@ def reset_initialized_parameter(model, include_self=True):
 
         elif isinstance(m, YoloUnit):
             ## reset conv
+            if not hasattr(m, '_groups'):
+                return
             k = float(m._groups) / (m.filter.shape[1] * m._kernel_size[0] *
                                     m._kernel_size[1])
             k = math.sqrt(k)
